@@ -54,6 +54,7 @@ int init_window(game_window *win, char *title, int width, int height)
 	}
 
 	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 255);
+	SDL_RenderPresent(win->renderer);
 
 	win->running = 1;
 
@@ -113,7 +114,7 @@ int main()
 	gol *game = gol_create(MAP_WIDTH, MAP_HEIGHT);
 	gol_build_random(game, 1000);
 
-	init_window(&win, "gameoflife", SCREEN_WIDTH, SCREEN_HEIGHT);
+	init_window(&win, "game of life", SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	while (win.running)
 	{
