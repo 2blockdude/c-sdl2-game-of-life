@@ -76,6 +76,7 @@ void handle_events(game_window *win)
 		{
 			case SDL_QUIT:
 				win->running = 0;
+				break;
 		};
 	}
 }
@@ -93,8 +94,8 @@ void render(SDL_Renderer *renderer, gol *game)
 			int y = (i - x) / game->width;
 
 			// width and height of pixels
-			float pixel_w = round((float)SCREEN_WIDTH / (float)game->width);
-			float pixel_h = round((float)SCREEN_HEIGHT / (float)game->height);
+			int pixel_w = round((float)SCREEN_WIDTH / (float)game->width);
+			int pixel_h = round((float)SCREEN_HEIGHT / (float)game->height);
 
 			SDL_Rect tile = { x * pixel_w, y * pixel_h, pixel_w, pixel_h };
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -119,7 +120,6 @@ int main()
 		handle_events(&win);
 		gol_update(game);
 		render(win.renderer, game);
-		SDL_Delay(100);
 	}
 
 	destroy_window(&win);
