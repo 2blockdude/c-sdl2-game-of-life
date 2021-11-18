@@ -2,11 +2,11 @@
 #include <SDL2/SDL.h>
 #include "game-of-life.h"
 
-#define SCREEN_WIDTH 700
-#define SCREEN_HEIGHT 700
+#define SCREEN_WIDTH		700
+#define SCREEN_HEIGHT	700
 
-#define MAP_WIDTH 100
-#define MAP_HEIGHT 100
+#define MAP_WIDTH			100
+#define MAP_HEIGHT		100
 
 typedef struct game_window game_window;
 
@@ -18,6 +18,7 @@ struct game_window
 	SDL_Event event;
 
 	char running;
+	char pause;
 
 	int width;
 	int height;
@@ -57,6 +58,7 @@ int init_window(game_window *win, char *title, int width, int height)
 	SDL_RenderPresent(win->renderer);
 
 	win->running = 1;
+	win->pause = 0;
 
 	return 0;
 }
@@ -69,7 +71,7 @@ void destroy_window(game_window *win)
 	SDL_Quit();
 }
 
-void handle_events(game_window *win)
+void handle_events(game_window *win, gol *game)
 {
 	while (SDL_PollEvent(&(win->event)))
 	{
@@ -78,13 +80,34 @@ void handle_events(game_window *win)
 			case SDL_QUIT:
 				win->running = 0;
 				break;
+
+			case SDL_MOUSEBUTTONDOWN:
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+				x = x / ((float)win->width / (float)game->width);
+				y = y / ((float)win->height / (float)game->height);
+				gol_build_dot(game, x, y);
+				break;
+
+			case SDL_KEYDOWN:
+				switch (win->event.key.keysym.sym)
+				{
+					case SDLK_SPACE:
+						win->pause = win->pause == 1 ? 0 : 1;
+						break;
+				};
+				break;
 		};
 	}
 }
 
-void render(SDL_Renderer *renderer, gol *game)
+void render(game_window *win, gol *game)
 {
-	SDL_RenderClear(renderer);
+	SDL_RenderClear(win->renderer);
+
+	// width and height of pixels
+	int pixel_w = (win->width / game->width);
+	int pixel_h = (win->height / game->height);
 
 	for (int i = 0; i < game->width * game->height; i++)
 	{
@@ -94,33 +117,31 @@ void render(SDL_Renderer *renderer, gol *game)
 			int x = i % game->width;
 			int y = (i - x) / game->width;
 
-			// width and height of pixels
-			int pixel_w = (SCREEN_WIDTH / game->width);
-			int pixel_h = (SCREEN_HEIGHT / game->height);
-
 			SDL_Rect tile = { x * pixel_w, y * pixel_h, pixel_w, pixel_h };
-			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			SDL_RenderFillRect(renderer, &tile);
+			SDL_SetRenderDrawColor(win->renderer, 0, 0, 0, 255);
+			SDL_RenderFillRect(win->renderer, &tile);
 		}
 	}
 
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderPresent(renderer);
+	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 255);
+	SDL_RenderPresent(win->renderer);
 }
 
 int main()
 {
 	game_window win;
 	gol *game = gol_create(MAP_WIDTH, MAP_HEIGHT);
-	gol_build_random(game, 1000);
+	//gol_build_random(game, 1000);
 
 	init_window(&win, "game of life", SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	while (win.running)
 	{
-		handle_events(&win);
-		gol_update(game);
-		render(win.renderer, game);
+		handle_events(&win, game);
+		if (win.pause == 0) gol_update(game);
+		render(&win, game);
+
+		SDL_Delay(100);
 	}
 
 	destroy_window(&win);

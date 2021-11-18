@@ -102,6 +102,14 @@ void gol_build_shape(struct gol *game, char *shape, int x, int y)
 	}
 }
 
+void gol_build_dot(struct gol *game, int x, int y)
+{
+	char shape[] = 
+		"#\n";
+
+	gol_build_shape(game, shape, x, y);
+}
+
 void gol_build_glider(struct gol *game, int x, int y)
 {
 	char shape[] = 

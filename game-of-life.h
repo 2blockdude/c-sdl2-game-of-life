@@ -18,6 +18,7 @@ void gol_update			(struct gol *game);
 void gol_dump_map			(const struct gol *game);
 
 void gol_build_shape		(struct gol *game, char *shape, int x, int y);
+void gol_build_dot		(struct gol *game, int x, int y);
 void gol_build_glider	(struct gol *game, int x, int y);
 void gol_build_blinker	(struct gol *game, int x, int y);
 void gol_build_toad		(struct gol *game, int x, int y);
