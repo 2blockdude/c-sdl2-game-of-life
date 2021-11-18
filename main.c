@@ -2,8 +2,8 @@
 #include <SDL2/SDL.h>
 #include "game-of-life.h"
 
-#define SCREEN_WIDTH 650
-#define SCREEN_HEIGHT 650
+#define SCREEN_WIDTH 700
+#define SCREEN_HEIGHT 700
 
 #define MAP_WIDTH 100
 #define MAP_HEIGHT 100
@@ -95,8 +95,8 @@ void render(SDL_Renderer *renderer, gol *game)
 			int y = (i - x) / game->width;
 
 			// width and height of pixels
-			int pixel_w = round((float)SCREEN_WIDTH / (float)game->width);
-			int pixel_h = round((float)SCREEN_HEIGHT / (float)game->height);
+			int pixel_w = (SCREEN_WIDTH / game->width);
+			int pixel_h = (SCREEN_HEIGHT / game->height);
 
 			SDL_Rect tile = { x * pixel_w, y * pixel_h, pixel_w, pixel_h };
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
