@@ -88,15 +88,13 @@ void render(SDL_Renderer *renderer, gol *game)
 	{
 		if (game->output[i] > 0)
 		{
-			int x = i % game->width;			// column
-			int y = (i - x) / game->width;	// row
+			// row and column
+			int x = i % game->width;
+			int y = (i - x) / game->width;
 
-			float pixel_w = (float)SCREEN_WIDTH / (float)game->width;		// pixel width
-			float pixel_h = (float)SCREEN_HEIGHT / (float)game->height;	// pixel height
-
-			// stupid round up thing... sorry
-			pixel_w = (pixel_w - (int)pixel_w) >= 0.5f ? (int)pixel_w + 1 : (int)pixel_w;
-			pixel_h = (pixel_h - (int)pixel_h) >= 0.5f ? (int)pixel_h + 1 : (int)pixel_h;
+			// width and height of pixels
+			float pixel_w = round((float)SCREEN_WIDTH / (float)game->width);
+			float pixel_h = round((float)SCREEN_HEIGHT / (float)game->height);
 
 			SDL_Rect tile = { x * pixel_w, y * pixel_h, pixel_w, pixel_h };
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
