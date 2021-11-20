@@ -27,7 +27,7 @@ void gol_update(struct gol *game)
 	// update alive state
 	for (int i = 0; i < game->height * game->width; i++)
 	{
-		game->output[i] = game->buffer[i];
+		game->buffer[i] = game->output[i];
 
 		// gets columns and rows
 		int x = i % game->width;			// column
@@ -43,22 +43,22 @@ void gol_update(struct gol *game)
 
 		int neighbors =
 			// get above
-			game->buffer[above * game->width + left] +
-			game->buffer[above * game->width + x] +
-			game->buffer[above * game->width + right] +
+			game->output[above * game->width + left] +
+			game->output[above * game->width + x] +
+			game->output[above * game->width + right] +
 			// get middle
-			game->buffer[y * game->width + left] +
-			game->buffer[y * game->width + right] +
+			game->output[y * game->width + left] +
+			game->output[y * game->width + right] +
 			// get below
-			game->buffer[below * game->width + left] +
-			game->buffer[below * game->width + x] +
-			game->buffer[below * game->width + right];
+			game->output[below * game->width + left] +
+			game->output[below * game->width + x] +
+			game->output[below * game->width + right];
 
 		// cell rules
 		if (neighbors >= 4 || neighbors <= 1)
-			game->output[i] = 0;
+			game->buffer[i] = 0;
 		else if (neighbors == 3)
-			game->output[i] = 1;
+			game->buffer[i] = 1;
 
 	}
 
