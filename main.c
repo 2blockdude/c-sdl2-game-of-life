@@ -19,10 +19,18 @@ struct game_window
 
 	char running;
 	char pause;
+	char mouse_press;
+
+	int delay;
+	int mouse_pos_x;
+	int mouse_pos_y;
 
 	int width;
 	int height;
 };
+
+int init_window(game_window *win, char *title, int width, int height);
+void render(game_window *win, gol *game);
 
 int init_window(game_window *win, char *title, int width, int height)
 {
@@ -57,8 +65,11 @@ int init_window(game_window *win, char *title, int width, int height)
 	SDL_SetRenderDrawColor(win->renderer, 255, 255, 255, 255);
 	SDL_RenderPresent(win->renderer);
 
+	SDL_GetMouseState(&win->mouse_pos_x, &win->mouse_pos_y);
+	win->mouse_press = 0;
 	win->running = 1;
 	win->pause = 0;
+	win->delay = 100;
 
 	return 0;
 }
@@ -81,12 +92,30 @@ void handle_events(game_window *win, gol *game)
 				win->running = 0;
 				break;
 
+			case SDL_MOUSEMOTION:
+				SDL_GetMouseState(&win->mouse_pos_x, &win->mouse_pos_y);
+				if (win->pause == 1 && win->mouse_press == 1 && win->event.button.button == SDL_BUTTON_LEFT)
+				{
+					int x = win->mouse_pos_x / ((float)win->width / (float)game->width);
+					int y = win->mouse_pos_y / ((float)win->height / (float)game->height);
+					gol_build_dot(game, x, y);
+					render(win, game);
+				}
+				break;
+
 			case SDL_MOUSEBUTTONDOWN:
-				int x, y;
-				SDL_GetMouseState(&x, &y);
-				x = x / ((float)win->width / (float)game->width);
-				y = y / ((float)win->height / (float)game->height);
-				gol_build_dot(game, x, y);
+				if (win->pause == 1 && win->mouse_press == 0 && win->event.button.button == SDL_BUTTON_LEFT)
+				{
+					win->mouse_press = 1;
+					int x = win->mouse_pos_x / ((float)win->width / (float)game->width);
+					int y = win->mouse_pos_y / ((float)win->height / (float)game->height);
+					gol_build_dot(game, x, y);
+					render(win, game);
+				}
+				break;
+
+			case SDL_MOUSEBUTTONUP:
+				if (win->mouse_press == 1) win->mouse_press = 0;
 				break;
 
 			case SDL_KEYDOWN:
@@ -131,7 +160,6 @@ int main()
 {
 	game_window win;
 	gol *game = gol_create(MAP_WIDTH, MAP_HEIGHT);
-	//gol_build_random(game, 1000);
 
 	init_window(&win, "game of life", SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -139,9 +167,8 @@ int main()
 	{
 		handle_events(&win, game);
 		if (win.pause == 0) gol_update(game);
-		render(&win, game);
-
-		SDL_Delay(100);
+		if (win.pause == 0) render(&win, game);
+		if (win.pause == 0) SDL_Delay(win.delay);
 	}
 
 	destroy_window(&win);
