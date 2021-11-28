@@ -21,12 +21,14 @@ struct game_window
 	char pause;
 	char mouse_press;
 
-	int delay;
+	int delta;
 	int mouse_pos_x;
 	int mouse_pos_y;
 
 	int width;
 	int height;
+   
+   int tfps;
 };
 
 int init_window(game_window *win, char *title, int width, int height);
@@ -69,7 +71,8 @@ int init_window(game_window *win, char *title, int width, int height)
 	win->mouse_press = 0;
 	win->running = 1;
 	win->pause = 0;
-	win->delay = 100;
+	win->delta = 0;
+   win->tfps = 20;
 
 	return 0;
 }
@@ -124,6 +127,14 @@ void handle_events(game_window *win, gol *game)
 					case SDLK_SPACE:
 						win->pause = win->pause == 1 ? 0 : 1;
 						break;
+
+               case SDLK_DOWN:
+                  if (win->tfps != 5) win->tfps -= 5;
+                  break;
+
+               case SDLK_UP:
+                  if (win->tfps != 120) win->tfps += 5;
+                  break;
 				};
 				break;
 		};
@@ -160,19 +171,30 @@ int main()
 {
 	game_window win;
 	gol *game = gol_create(MAP_WIDTH, MAP_HEIGHT);
+   gol_build_random(game, 1000);
 
 	init_window(&win, "game of life", SCREEN_WIDTH, SCREEN_HEIGHT);
 
+   unsigned int start, end;
 	while (win.running)
 	{
+      start = SDL_GetTicks();
+
 		handle_events(&win, game);
-		if (win.pause == 0) gol_update(game);
-		if (win.pause == 0) render(&win, game);
-		if (win.pause == 0) SDL_Delay(win.delay);
-	}
+		if (win.pause == 0)
+      {
+         gol_update(game);
+         render(&win, game);
+      }
 
-	destroy_window(&win);
-	gol_free(game);
+      SDL_Delay((1000.0f / win.tfps) - (SDL_GetTicks() - start));
+      end = SDL_GetTicks();
 
-	return 0;
+      win.delta = (float)(end - start) / 1000.0f;
+   }
+
+   destroy_window(&win);
+   gol_free(game);
+
+   return 0;
 }
